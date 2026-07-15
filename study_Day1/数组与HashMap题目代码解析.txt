@@ -1,0 +1,445 @@
+study_Day1：数组与 HashMap 题目代码解析
+========================================
+
+本文整理以下两个题目：
+1. 两数之和（TwoSum）
+2. 有效的字母异位词（ValidAnagram）
+
+
+一、两数之和（TwoSum）
+======================
+
+1. 题目要求
+-----------
+
+给定一个整数数组 nums 和一个目标值 target，在数组中找出两个数，使它们的和
+等于 target，并返回这两个数的数组下标。
+
+示例：
+nums = [3, 8, 12, 5]
+target = 13
+
+因为 nums[1] + nums[3] = 8 + 5 = 13，所以返回 [1, 3]。
+
+
+2. 核心代码
+-----------
+
+public int[] twoSum(int[] nums, int target) {
+    Map<Integer, Integer> map = new HashMap<>();
+
+    for (int i = 0; i < nums.length; i++) {
+        int complement = target - nums[i];
+
+        if (map.containsKey(complement)) {
+            return new int[]{map.get(complement), i};
+        }
+
+        map.put(nums[i], i);
+    }
+
+    return new int[0];
+}
+
+
+3. HashMap 保存什么
+-------------------
+
+map 保存的是：
+
+    已经遍历过的数字 -> 这个数字的数组下标
+
+例如 map 中的内容为：
+
+    {3=0, 8=1}
+
+它表示数字 3 位于下标 0，数字 8 位于下标 1。
+
+Map<Integer, Integer> 中：
+- 第一个 Integer 是键的类型，用来保存数组中的数字。
+- 第二个 Integer 是值的类型，用来保存数字对应的下标。
+
+
+4. 逐行解析
+-----------
+
+（1）创建 HashMap
+
+Map<Integer, Integer> map = new HashMap<>();
+
+创建一个空的 HashMap，用于记录已经遍历过的数字及其下标。
+
+
+（2）遍历数组
+
+for (int i = 0; i < nums.length; i++) {
+
+i 是当前元素的数组下标，nums[i] 是当前元素的值。
+
+
+（3）计算补数
+
+int complement = target - nums[i];
+
+complement 表示当前数字还需要和哪个数字相加，才能得到 target。
+
+例如当前数字是 5，target 是 13：
+
+    complement = 13 - 5 = 8
+
+这表示只要前面出现过数字 8，就找到了答案。
+
+
+（4）在 HashMap 中查找补数
+
+if (map.containsKey(complement)) {
+
+containsKey() 判断 map 中是否存在指定的键。
+
+如果 map 中已经存在 complement，说明之前遍历过的某个数字与当前数字之和
+正好等于 target。
+
+
+（5）返回两个下标
+
+return new int[]{map.get(complement), i};
+
+map.get(complement) 取得补数的下标，i 是当前数字的下标。
+
+例如：
+
+    complement = 8
+    map.get(8) = 1
+    i = 3
+
+所以返回：
+
+    new int[]{1, 3}
+
+
+（6）记录当前数字和下标
+
+map.put(nums[i], i);
+
+如果没有找到补数，就将当前数字和它的下标放进 map，供后面的元素查找。
+
+代码必须先查找补数，再保存当前数字。这样可以避免同一个数组元素被重复使用。
+
+
+（7）没有找到答案
+
+return new int[0];
+
+如果遍历完整个数组仍然没有找到答案，就返回一个长度为 0 的空数组。
+
+
+5. 每一次遍历的变量变化
+-------------------------
+
+输入：
+nums = [3, 8, 12, 5]
+target = 13
+
+循环开始前：
+map = {}
+
+第一次遍历：
+i = 0
+nums[i] = 3
+complement = 13 - 3 = 10
+查找前 map = {}
+map 中没有 10，所以保存 3=0。
+遍历后 map = {3=0}
+
+第二次遍历：
+i = 1
+nums[i] = 8
+complement = 13 - 8 = 5
+查找前 map = {3=0}
+map 中没有 5，所以保存 8=1。
+遍历后 map = {3=0, 8=1}
+
+第三次遍历：
+i = 2
+nums[i] = 12
+complement = 13 - 12 = 1
+查找前 map = {3=0, 8=1}
+map 中没有 1，所以保存 12=2。
+遍历后 map = {3=0, 8=1, 12=2}
+
+第四次遍历：
+i = 3
+nums[i] = 5
+complement = 13 - 5 = 8
+查找前 map = {3=0, 8=1, 12=2}
+map 中存在 8，并且 map.get(8) 等于 1。
+因此返回 [1, 3]，方法立即结束。
+
+
+6. 复杂度
+---------
+
+时间复杂度：O(n)
+原因：数组只需要遍历一次，HashMap 的查找和添加平均为 O(1)。
+
+空间复杂度：O(n)
+原因：最坏情况下，需要把数组中的多个元素保存到 HashMap 中。
+
+
+二、有效的字母异位词（ValidAnagram）
+====================================
+
+1. 题目要求
+-----------
+
+给定两个字符串 s 和 t，判断 t 是否是 s 的字母异位词。
+
+字母异位词需要满足：
+- 两个字符串长度相同。
+- 包含的字符种类相同。
+- 每个字符出现的次数相同。
+- 字符排列顺序可以不同。
+
+示例一：
+s = "anagram"
+t = "nagaram"
+结果为 true。
+
+示例二：
+s = "rat"
+t = "car"
+结果为 false。
+
+
+2. 核心代码
+-----------
+
+public boolean isAnagram(String s, String t) {
+    if (s.length() != t.length()) {
+        return false;
+    }
+
+    Map<Character, Integer> countMap = new HashMap<>();
+
+    for (char c : s.toCharArray()) {
+        countMap.put(c, countMap.getOrDefault(c, 0) + 1);
+    }
+
+    for (char c : t.toCharArray()) {
+        if (!countMap.containsKey(c)) {
+            return false;
+        }
+
+        countMap.put(c, countMap.get(c) - 1);
+
+        if (countMap.get(c) < 0) {
+            return false;
+        }
+    }
+
+    for (int count : countMap.values()) {
+        if (count != 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+3. HashMap 保存什么
+-------------------
+
+countMap 保存的是：
+
+    字符 -> 字符在字符串 s 中出现的次数
+
+例如：
+
+    {a=3, n=1, g=1, r=1, m=1}
+
+Map<Character, Integer> 中：
+- Character 表示键是字符。
+- Integer 表示值是字符出现的次数。
+
+
+4. 逐行解析
+-----------
+
+（1）比较字符串长度
+
+if (s.length() != t.length()) {
+    return false;
+}
+
+如果两个字符串长度不同，就不可能包含数量完全相同的字符，可以直接返回 false。
+
+
+（2）创建计数 HashMap
+
+Map<Character, Integer> countMap = new HashMap<>();
+
+创建一个空的 HashMap，用来统计每个字符的出现次数。
+
+
+（3）将字符串转换成字符数组
+
+s.toCharArray()
+
+例如字符串 "abc" 转换后相当于：
+
+    {'a', 'b', 'c'}
+
+增强 for 循环会将每个字符依次赋值给变量 c。
+
+
+（4）统计 s 中的字符
+
+countMap.put(c, countMap.getOrDefault(c, 0) + 1);
+
+getOrDefault(c, 0) 的意思是：
+- 如果 c 已经存在，取得原来的次数。
+- 如果 c 不存在，使用默认值 0。
+
+然后将次数加 1，再使用 put() 保存新次数。
+
+例如第一次遇到字符 a：
+
+    原次数 = 0
+    新次数 = 0 + 1 = 1
+    countMap = {a=1}
+
+再次遇到字符 a：
+
+    原次数 = 1
+    新次数 = 1 + 1 = 2
+    countMap = {a=2}
+
+
+（5）遍历 t，判断字符是否存在
+
+if (!countMap.containsKey(c)) {
+    return false;
+}
+
+如果 t 中出现了一个 s 中从未出现的字符，就直接返回 false。
+
+
+（6）抵消字符次数
+
+countMap.put(c, countMap.get(c) - 1);
+
+t 中每出现一个字符，就把该字符在 countMap 中的次数减 1。
+
+可以将这个过程理解为：s 中的一个字符和 t 中的一个相同字符互相抵消。
+
+
+（7）判断字符是否出现过多
+
+if (countMap.get(c) < 0) {
+    return false;
+}
+
+如果次数小于 0，说明这个字符在 t 中出现的次数比在 s 中更多，因此返回 false。
+
+
+（8）检查所有字符是否完全抵消
+
+for (int count : countMap.values()) {
+    if (count != 0) {
+        return false;
+    }
+}
+
+countMap.values() 取得 HashMap 中的所有次数。
+
+如果其中一个次数不为 0，说明两个字符串中某个字符的数量不同，返回 false。
+
+
+（9）返回 true
+
+return true;
+
+如果代码能执行到这里，说明所有字符都刚好抵消为 0，两个字符串互为字母异位词。
+
+
+5. 每一次遍历的变量变化
+-------------------------
+
+输入：
+s = "anagram"
+t = "nagaram"
+
+第一阶段：统计 s
+
+当前字符 a：{} -> {a=1}
+当前字符 n：{a=1} -> {a=1, n=1}
+当前字符 a：{a=1, n=1} -> {a=2, n=1}
+当前字符 g：{a=2, n=1} -> {a=2, n=1, g=1}
+当前字符 r：{a=2, n=1, g=1} -> {a=2, n=1, g=1, r=1}
+当前字符 a：{a=2, n=1, g=1, r=1} -> {a=3, n=1, g=1, r=1}
+当前字符 m：{a=3, n=1, g=1, r=1} -> {a=3, n=1, g=1, r=1, m=1}
+
+第二阶段：使用 t 抵消次数
+
+当前字符 n：n 从 1 变成 0
+当前字符 a：a 从 3 变成 2
+当前字符 g：g 从 1 变成 0
+当前字符 a：a 从 2 变成 1
+当前字符 r：r 从 1 变成 0
+当前字符 a：a 从 1 变成 0
+当前字符 m：m 从 1 变成 0
+
+最终：
+
+    countMap = {a=0, n=0, g=0, r=0, m=0}
+
+所有次数都是 0，因此返回 true。
+
+
+6. 错误示例
+-----------
+
+s = "abb"
+t = "aaa"
+
+统计 s 后：
+
+    countMap = {a=1, b=2}
+
+遍历 t：
+- 第一个 a：a 从 1 变成 0。
+- 第二个 a：a 从 0 变成 -1。
+- 次数小于 0，说明 t 中的 a 过多，返回 false。
+
+
+7. 复杂度
+---------
+
+时间复杂度：O(n)
+原因：分别遍历 s、t 和 HashMap，忽略常数后仍然是 O(n)。
+
+空间复杂度：O(k)
+原因：HashMap 保存不同的字符，k 表示不同字符的数量。
+
+
+三、两个题目的共同点
+====================
+
+1. 都只需要对原始数据进行一次或少量遍历。
+2. 都使用 HashMap 保存“以后还需要快速查询的信息”。
+3. HashMap 的查询、添加和修改平均时间复杂度为 O(1)。
+4. 通过使用额外空间，将原本可能需要 O(n²) 的查找优化为 O(n)。
+
+两数之和保存：
+
+    数字 -> 数组下标
+
+有效的字母异位词保存：
+
+    字符 -> 出现次数
+
+学习 HashMap 时，最重要的问题是：
+
+    “我应该把什么信息作为键，什么信息作为值保存起来？”
+
